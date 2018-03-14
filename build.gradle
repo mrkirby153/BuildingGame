@@ -1,0 +1,65 @@
+buildscript {
+    ext.kotlin_version = '1.2.30'
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'kotlin'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+group = "com.mrkirby153"
+version = "1.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+    maven {
+        url = "https://repo.mrkirby153.com/repository/maven-public/"
+        name = "mrkirby153"
+    }
+    maven {
+        url = 'https://hub.spigotmc.org/nexus/content/groups/public/'
+    }
+    maven {
+        url = "https://repo.aikar.co/nexus/content/groups/aikar/"
+    }
+}
+
+configurations {
+    compile.extendsFrom shadow
+}
+
+dependencies {
+    compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+    shadow 'co.aikar:acf-bukkit:0.5.0-SNAPSHOT'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+}
+
+shadowJar {
+    classifier = null
+    configurations = [project.configurations.shadow]
+    relocate 'co.aikar.commands', 'com.mrkirby153.buildinggame.acf'
+}
+task copyJar(type: Copy){
+    from jar
+    into 'run/plugins'
+}
+
+copyJar.dependsOn build
+build.dependsOn shadowJar
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
